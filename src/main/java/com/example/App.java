@@ -38,7 +38,7 @@ public class App {
     private static List<String> numList = new ArrayList<>(Arrays.asList(numField));
 
     public static void main( String[] args ){      
-        String connectionString = "mongodb://52.206.187.77:27022";
+        String connectionString = "mongodb://54.86.18.237:27022";
         //String connectionString = "mongodb://127.0.0.1:27017";
         Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
         mongoLogger.setLevel(Level.SEVERE); 
@@ -146,9 +146,15 @@ public class App {
             }
         }
         
-        collisionCollection.insertOne(record);
-        System.out.println("record inserted successfully");
-        System.out.println(record.toJson());
+        try{
+            collisionCollection.insertOne(record);
+            System.out.println("record inserted successfully");
+            System.out.println(record.toJson());
+        }
+        catch (Exception e) {
+            System.out.println("Insertion failed. Duplicate CASE_ID error");
+            return;
+        }    
     }
 
     public static void updateRecord(){
