@@ -38,8 +38,8 @@ public class App {
     private static List<String> numList = new ArrayList<>(Arrays.asList(numField));
 
     public static void main( String[] args ){      
-        String connectionString = "mongodb://54.86.18.237:27022";
-        //String connectionString = "mongodb://127.0.0.1:27017";
+        //String connectionString = "mongodb://54.86.18.237:27022";
+        String connectionString = "mongodb://127.0.0.1:27017";
         Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
         mongoLogger.setLevel(Level.SEVERE); 
             
@@ -51,12 +51,13 @@ public class App {
             System.out.println();
             int input = 0;
 
-            while(input != 5){
+            while(input != 6){
                 System.out.println("1.    Insert a new collision record");
                 System.out.println("2.    Update a collision record");
                 System.out.println("3.    Delete a collision record");
-                System.out.println("4.    Find the weather that causes the most collisions");
-                System.out.println("5.    Exit");
+                System.out.println("4.    Find a collision record");
+                System.out.println("5.    Find the weather that causes the most collisions");
+                System.out.println("6.    Exit");
                 System.out.print ("Please enter your choice:  ");
 
                 while(!scanner.hasNextInt()){
@@ -82,10 +83,15 @@ public class App {
                         break;
                     case 4:
                         System.out.println();
-                        weatherAnalysis();
+                        findRecord();
                         System.out.println();
                         break;
                     case 5:
+                        System.out.println();
+                        weatherAnalysis();
+                        System.out.println();
+                        break;
+                    case 6:
                         break;
                     default:
                         System.out.println();
@@ -206,6 +212,39 @@ public class App {
         for(Document record: records){
             System.out.println(record.toJson());
         }        
+    }
+
+    public static void findRecord(){
+        String caseId;
+        Scanner scan = new Scanner(System.in);
+
+        while (true) {
+            System.out.print("Please enter the case id: ");
+            caseId = scan.nextLine().trim();
+            if (caseId.isEmpty()) {
+                System.out.println("Case id cannot be empty");
+                System.out.println();
+                continue;
+            }
+
+            try{
+                Integer.parseInt(caseId);
+            }catch (Exception e){
+                System.out.println("Error: The case id is invalid");
+                System.out.println();
+                continue;
+            }
+            break;
+        }
+
+        List<Document> records = collisionCollection.find(eq("CASE_ID", Integer.parseInt(caseId))).into(new ArrayList<>());
+        if (records.size() == 0) {
+            System.out.println("No results found.");
+        } else{
+            for(Document record: records){
+                System.out.println(record.toJson());
+            }  
+        }            
     }
 
     public static void deleteRecord(){
