@@ -59,7 +59,7 @@ public class App {
                 System.out.println("5.    Get the number of collisions and killed victims each year");
                 System.out.println("6.    Find the weather that causes the most collisions");
                 System.out.println("7.    Get the percentage of fatal collisions with alcohol involved");    
-                System.out.println("8.    Get the percentage of fatal collisions with alcohol involved");            
+                System.out.println("8.    Find the day of the week that causes the most traffic collisions");            
                 System.out.println("9.    Exit");
                 System.out.print ("Please enter your choice:  ");
 
