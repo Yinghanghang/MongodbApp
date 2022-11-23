@@ -1,4 +1,4 @@
-# MongodbApp
+# MongoDBApp
 
  A database application where MongoDB is deployed as sharded cluster on AWS cloud.
  MongoDB is deployed in a cluster of seven nodes.
