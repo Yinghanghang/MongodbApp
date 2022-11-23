@@ -51,13 +51,15 @@ public class App {
             System.out.println();
             int input = 0;
 
-            while(input != 6){
+            while(input != 8){
                 System.out.println("1.    Insert a new collision record");
                 System.out.println("2.    Update a collision record");
                 System.out.println("3.    Delete a collision record");
                 System.out.println("4.    Find a collision record");
-                System.out.println("5.    Find the weather that causes the most collisions");
-                System.out.println("6.    Exit");
+                System.out.println("5.    Get the number of collisions and killed victims each year");
+                System.out.println("6.    Find the weather that causes the most collisions");
+                System.out.println("7.    Get the percentage of fatal collisions with alcohol involved");               
+                System.out.println("8.    Exit");
                 System.out.print ("Please enter your choice:  ");
 
                 while(!scanner.hasNextInt()){
@@ -88,10 +90,20 @@ public class App {
                         break;
                     case 5:
                         System.out.println();
+                        getNumberOfCollisionsAndVictims();
+                        System.out.println();
+                        break;    
+                    case 6:
+                        System.out.println();
                         weatherAnalysis();
                         System.out.println();
                         break;
-                    case 6:
+                    case 7:
+                        System.out.println();
+                        alcoholAnalysis();
+                        System.out.println();
+                        break;    
+                    case 8:
                         break;
                     default:
                         System.out.println();
@@ -274,6 +286,22 @@ public class App {
         System.out.println("Record deleted successfully.");
     }
 
+    private static void getNumberOfCollisionsAndVictims() {
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$ACCIDENT_YEAR", Number_Collisions: { $sum: 1 }, Number_Killed: { $sum: "$NUMBER_KILLED"} } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Accident Year": "$_id", 
+        //             "Number_Collisions": 1,
+        //             "Number_Killed": 1
+        //         }
+        //         },
+        //     { $sort: {"Accident Year":1 } }
+        //     ]
+        // )
+    }
+
     public static void weatherAnalysis(){
         long totalDocument = collisionCollection.countDocuments();
 
@@ -311,6 +339,25 @@ public class App {
         for (Document doc : output) {
             System.out.println(doc.toJson());
         }
+    }
+
+    private static void alcoholAnalysis() {
+        // var totalCollisionSeverity = db.collision.countDocuments({ COLLISION_SEVERITY: 1 })
+        // db.collision.aggregate(
+        //     [
+        //         { $match: { COLLISION_SEVERITY: 1 } },
+        //         { $group: { _id: "$ALCOHOL_INVOLVED", count: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Alcohol Involved": "$_id", 
+        //             "count": 1, 
+        //             "percentage": { 
+        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalCollisionSeverity }] }, 100 ] }, 0,2 ] }, "", "%" ]}
+        //             }
+        //         },
+        //     { $sort: { count: -1 } }
+        //     ]
+        // )
     }
 
     private static void addFields(Document record){
