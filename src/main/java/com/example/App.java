@@ -51,15 +51,16 @@ public class App {
             System.out.println();
             int input = 0;
 
-            while(input != 8){
+            while(input != 9){
                 System.out.println("1.    Insert a new collision record");
                 System.out.println("2.    Update a collision record");
                 System.out.println("3.    Delete a collision record");
                 System.out.println("4.    Find a collision record");
                 System.out.println("5.    Get the number of collisions and killed victims each year");
                 System.out.println("6.    Find the weather that causes the most collisions");
-                System.out.println("7.    Get the percentage of fatal collisions with alcohol involved");               
-                System.out.println("8.    Exit");
+                System.out.println("7.    Get the percentage of fatal collisions with alcohol involved");    
+                System.out.println("8.    Get the percentage of fatal collisions with alcohol involved");            
+                System.out.println("9.    Exit");
                 System.out.print ("Please enter your choice:  ");
 
                 while(!scanner.hasNextInt()){
@@ -104,6 +105,10 @@ public class App {
                         System.out.println();
                         break;    
                     case 8:
+                        System.out.println();
+                        weekdayAnalysis();
+                        System.out.println();    
+                    case 9:
                         break;
                     default:
                         System.out.println();
@@ -122,7 +127,7 @@ public class App {
         }     
     }
 
-    public static void insertRecord(){
+    private static void insertRecord(){
         Scanner scan = new Scanner(System.in);
         Document record = new Document();
 
@@ -175,7 +180,7 @@ public class App {
         }    
     }
 
-    public static void updateRecord(){
+    private static void updateRecord(){
         Scanner scan = new Scanner(System.in);
         int caseId;
         Bson updates;
@@ -226,7 +231,7 @@ public class App {
         }        
     }
 
-    public static void findRecord(){
+    private static void findRecord(){
         String caseId;
         Scanner scan = new Scanner(System.in);
 
@@ -259,7 +264,7 @@ public class App {
         }            
     }
 
-    public static void deleteRecord(){
+    private static void deleteRecord(){
         String caseId;
         Scanner scan = new Scanner(System.in);
 
@@ -302,7 +307,7 @@ public class App {
         // )
     }
 
-    public static void weatherAnalysis(){
+    private static void weatherAnalysis(){
         long totalDocument = collisionCollection.countDocuments();
 
         AggregateIterable<Document> output = collisionCollection.aggregate(
@@ -353,6 +358,23 @@ public class App {
         //             "count": 1, 
         //             "percentage": { 
         //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalCollisionSeverity }] }, 100 ] }, 0,2 ] }, "", "%" ]}
+        //             }
+        //         },
+        //     { $sort: { count: -1 } }
+        //     ]
+        // )
+    }
+
+    private static void weekdayAnalysis() {
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$DAY_OF_WEEK", count: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Day_Of_Week": "$_id", 
+        //             "count": 1, 
+        //             "percentage": { 
+        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
         //             }
         //         },
         //     { $sort: { count: -1 } }
