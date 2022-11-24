@@ -144,7 +144,6 @@ public class App {
                         motorcycleAnalysis();
                         System.out.println();   
                     case 16:
-                        System.out.println();  
                         break;
                     default:
                         System.out.println();
@@ -465,24 +464,49 @@ public class App {
     }
 
     private static void violationTypeAnalysis() {
+        long totalDocument = collisionCollection.countDocuments();
 
-        // var totalDocument = db.collision.countDocuments()
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.group("$PCF_VIOL_CATEGORY", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Violation Type", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalDocument
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")),
+                Aggregates.limit(5)
+            )
+        );
 
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$PCF_VIOL_CATEGORY", count: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Violation Type": "$_id", 
-        //             "count": 1, 
-        //             "percentage": { 
-        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
-        //             }
-        //         },
-        //     { $sort: { count: -1 } },
-        //     { $limit : 5 }
-        //     ]
-        // )
+        System.out.println(
+        "01 - Driving or Bicycling Under the Influence of Alcohol or Drug;  02 - Impeding Traffic" 
+        + "\n" + "03 - Unsafe Speed; 04 - Following Too Closely;  05 - Wrong Side of Road; 06 - Improper Passing"
+        + "\n" + "07 - Unsafe Lane Change; 08 - Improper Turning;  09 - Automobile Right of Way"
+        + "\n" + "10 - Pedestrian Right of Way;  11 - Pedestrian Violation; 12 - Traffic Signals and Signs"
+        + "\n" + "13 - Hazardous Parking;  14 - Lights;  15 - Brakes ");
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
 
     }
 
