@@ -144,6 +144,7 @@ public class App {
                         motorcycleAnalysis();
                         System.out.println();   
                     case 16:
+                        System.out.println();  
                         break;
                     default:
                         System.out.println();
@@ -160,7 +161,7 @@ public class App {
             System.out.println("operation failed");
             return;
         }     
-        System.out.println("Bye");   
+        System.out.println("Thank for using our service. Bye");   
     }
 
 
@@ -522,23 +523,44 @@ public class App {
     }
 
     private static void collisionSeverityAnalysis() {
-        // var totalDocument = db.collision.countDocuments()
+        long totalDocument = collisionCollection.countDocuments();
 
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$COLLISION_SEVERITY", count: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Collision Severity": "$_id", 
-        //             "count": 1, 
-        //             "percentage": { 
-        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
-        //             }
-        //         },
-        // { $sort: { count: -1 } }
-        //     ]
-        // )
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.group("$COLLISION_SEVERITY", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Collision Severity", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalDocument
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")) 
+            )
+        );
 
+        System.out.println("1 - Fatal; 2 - Injury (Severe); 3 - Injury (Other Visible); 4 - Injury (Complaint of Pain); 0 - Property Damage Only");
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
     }
 
     private static void motorcycleAnalysis() {
