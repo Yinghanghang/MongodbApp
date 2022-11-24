@@ -51,7 +51,7 @@ public class App {
             System.out.println();
             int input = 0;
 
-            while(input != 9){
+            while(input != 16){
                 System.out.println("1.    Insert a new collision record");
                 System.out.println("2.    Update a collision record");
                 System.out.println("3.    Delete a collision record");
@@ -59,8 +59,15 @@ public class App {
                 System.out.println("5.    Get the number of collisions and killed victims each year");
                 System.out.println("6.    Find the weather that causes the most collisions");
                 System.out.println("7.    Get the percentage of fatal collisions with alcohol involved");    
-                System.out.println("8.    Find the day of the week that causes the most traffic collisions");            
-                System.out.println("9.    Exit");
+                System.out.println("8.    Find the day of the week that causes the most traffic collisions");      
+                System.out.println("9.    Find the traffic violation types that cause the most collisions");   
+                System.out.println("10.   Find the effect of lighting on traffic collisions");   
+                System.out.println("11.   Find the effect of road condition on traffic collisions");   
+                System.out.println("12.   Find the most common collision type");   
+                System.out.println("13.   Find the collision type that causes the most deaths");   
+                System.out.println("14.   Get the collision severity with motorcycle involved");   
+                System.out.println("15.   Find the effect of light condition on collisions involving pedestrians");   
+                System.out.println("16.   Exit");
                 System.out.print ("Please enter your choice:  ");
 
                 while(!scanner.hasNextInt()){
@@ -91,7 +98,7 @@ public class App {
                         break;
                     case 5:
                         System.out.println();
-                        getNumberOfCollisionsAndVictims();
+                        countCollisionsAndVictims();
                         System.out.println();
                         break;    
                     case 6:
@@ -107,8 +114,36 @@ public class App {
                     case 8:
                         System.out.println();
                         weekdayAnalysis();
-                        System.out.println();    
+                        System.out.println(); 
                     case 9:
+                        System.out.println();
+                        violationTypeAnalysis();
+                        System.out.println();       
+                    case 10:
+                        System.out.println();
+                        lightingAnalysis();
+                        System.out.println();      
+                    case 11:
+                        System.out.println();
+                        roadConditionAnalysis();
+                        System.out.println();     
+                    case 12:
+                        System.out.println();
+                        mostCommonCollision();
+                        System.out.println();  
+                    case 13:
+                        System.out.println();
+                        collisionTypeAnalysis();
+                        System.out.println();    
+                    case 14:
+                        System.out.println();
+                        motorcycleAnalysis();
+                        System.out.println();       
+                    case 15:
+                        System.out.println();
+                        pedestriansAnalysis();
+                        System.out.println();   
+                    case 16:
                         break;
                     default:
                         System.out.println();
@@ -126,6 +161,7 @@ public class App {
             return;
         }     
     }
+
 
     private static void insertRecord(){
         Scanner scan = new Scanner(System.in);
@@ -291,22 +327,6 @@ public class App {
         System.out.println("Record deleted successfully.");
     }
 
-    private static void getNumberOfCollisionsAndVictims() {
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$ACCIDENT_YEAR", Number_Collisions: { $sum: 1 }, Number_Killed: { $sum: "$NUMBER_KILLED"} } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Accident Year": "$_id", 
-        //             "Number_Collisions": 1,
-        //             "Number_Killed": 1
-        //         }
-        //         },
-        //     { $sort: {"Accident Year":1 } }
-        //     ]
-        // )
-    }
-
     private static void weatherAnalysis(){
         long totalDocument = collisionCollection.countDocuments();
 
@@ -346,6 +366,22 @@ public class App {
         }
     }
 
+    private static void countCollisionsAndVictims() {
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$ACCIDENT_YEAR", Number_Collisions: { $sum: 1 }, Number_Killed: { $sum: "$NUMBER_KILLED"} } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Accident Year": "$_id", 
+        //             "Number_Collisions": 1,
+        //             "Number_Killed": 1
+        //         }
+        //         },
+        //     { $sort: {"Accident Year":1 } }
+        //     ]
+        // )
+    }
+
     private static void alcoholAnalysis() {
         // var totalCollisionSeverity = db.collision.countDocuments({ COLLISION_SEVERITY: 1 })
         // db.collision.aggregate(
@@ -381,6 +417,80 @@ public class App {
         //     ]
         // )
     }
+
+    private static void violationTypeAnalysis() {
+
+        // var totalDocument = db.collision.countDocuments()
+
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$PCF_VIOL_CATEGORY", count: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Violation Type": "$_id", 
+        //             "count": 1, 
+        //             "percentage": { 
+        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
+        //             }
+        //         },
+        //     { $sort: { count: -1 } },
+        //     { $limit : 5 }
+        //     ]
+        // )
+
+    }
+
+    private static void mostCommonCollision() {
+        // var totalDocument = db.collision.countDocuments()
+
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$TYPE_OF_COLLISION", count: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Collision Type": "$_id", 
+        //             "count": 1, 
+        //             "percentage": { 
+        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
+        //             }
+        //         },
+        //     { $sort: { count: -1 } },
+        //     { $limit : 3 }
+        //     ]
+        // )
+
+    }
+
+    private static void collisionTypeAnalysis() {
+        // db.collision.aggregate(
+        //     [
+        //         { $match: { COLLISION_SEVERITY: 1 } },
+        //         { $group: { _id: "$TYPE_OF_COLLISION", Fatal_Cases: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Collision Type": "$_id", 
+        //             Fatal_Cases: 1
+        //         }
+        //         },
+        //     { $sort: {Fatal_Cases: -1 } },
+        //     { $limit : 3 }
+        //     ]
+        // )
+
+    }
+
+    private static void roadConditionAnalysis() {
+    }
+
+    private static void lightingAnalysis() {
+    }
+
+    private static void pedestriansAnalysis() {
+    }
+
+    private static void motorcycleAnalysis() {
+    }
+
 
     private static void addFields(Document record){
         Scanner scan = new Scanner(System.in);      
