@@ -425,20 +425,43 @@ public class App {
     }
 
     private static void weekdayAnalysis() {
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$DAY_OF_WEEK", count: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Day_Of_Week": "$_id", 
-        //             "count": 1, 
-        //             "percentage": { 
-        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
-        //             }
-        //         },
-        //     { $sort: { count: -1 } }
-        //     ]
-        // )
+        long totalDocument = collisionCollection.countDocuments();
+
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.group("$DAY_OF_WEEK", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Day_Of_Week", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalDocument
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")) 
+            )
+        );
+
+        System.out.println("1 - Monday;  2 - Tuesday; 3 - Wednesday; 4 - Thursday;  5 - Friday; 6 - Saturday; 7 - Sunday");
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
     }
 
     private static void violationTypeAnalysis() {
@@ -625,7 +648,6 @@ public class App {
             System.out.println(doc.toJson());
         }
     }
-
 
     private static void addFields(Document record){
         Scanner scan = new Scanner(System.in);      
