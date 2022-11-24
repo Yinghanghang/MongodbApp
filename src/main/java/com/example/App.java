@@ -385,22 +385,43 @@ public class App {
     }
 
     private static void alcoholAnalysis() {
-        // var totalCollisionSeverity = db.collision.countDocuments({ COLLISION_SEVERITY: 1 })
-        // db.collision.aggregate(
-        //     [
-        //         { $match: { COLLISION_SEVERITY: 1 } },
-        //         { $group: { _id: "$ALCOHOL_INVOLVED", count: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Alcohol Involved": "$_id", 
-        //             "count": 1, 
-        //             "percentage": { 
-        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalCollisionSeverity }] }, 100 ] }, 0,2 ] }, "", "%" ]}
-        //             }
-        //         },
-        //     { $sort: { count: -1 } }
-        //     ]
-        // )
+        long totalCollisionSeverity  = collisionCollection.countDocuments(eq("COLLISION_SEVERITY", 1));
+
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.match(Filters.eq("COLLISION_SEVERITY", 1)),
+                Aggregates.group("$ALCOHOL_INVOLVED", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Alcohol Involved", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalCollisionSeverity
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")) 
+            )
+        );
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
     }
 
     private static void weekdayAnalysis() {
