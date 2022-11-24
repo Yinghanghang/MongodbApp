@@ -65,8 +65,8 @@ public class App {
                 System.out.println("11.   Find the effect of road condition on traffic collisions");   
                 System.out.println("12.   Find the most common collision type");   
                 System.out.println("13.   Find the collision type that causes the most deaths");   
-                System.out.println("14.   Get the collision severity with motorcycle involved");   
-                System.out.println("15.   Find the effect of light condition on collisions involving pedestrians");   
+                System.out.println("14.   Get the collision severity distribution among all collisions");   
+                System.out.println("15.   Get the collision severity distribution with motorcycle involved");   
                 System.out.println("16.   Exit");
                 System.out.print ("Please enter your choice:  ");
 
@@ -137,11 +137,11 @@ public class App {
                         System.out.println();    
                     case 14:
                         System.out.println();
-                        motorcycleAnalysis();
+                        collisionSeverityAnalysis();
                         System.out.println();       
                     case 15:
                         System.out.println();
-                        pedestriansAnalysis();
+                        motorcycleAnalysis();
                         System.out.println();   
                     case 16:
                         break;
@@ -160,6 +160,7 @@ public class App {
             System.out.println("operation failed");
             return;
         }     
+        System.out.println("Bye");   
     }
 
 
@@ -480,15 +481,106 @@ public class App {
     }
 
     private static void roadConditionAnalysis() {
+        // var totalDocument = db.collision.countDocuments()
+
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$ROAD_SURFACE", count: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Road Condition": "$_id", 
+        //             "count": 1, 
+        //             "percentage": { 
+        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
+        //             }
+        //         },
+        //     { $sort: { count: -1 } },
+        //     { $limit : 5 }
+        //     ]
+        // )
     }
 
     private static void lightingAnalysis() {
+        // var totalDocument = db.collision.countDocuments()
+
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$LIGHTING", count: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Lighting Type": "$_id", 
+        //             "count": 1, 
+        //             "percentage": { 
+        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
+        //             }
+        //         },
+        //     { $sort: { count: -1 } },
+        //     { $limit : 3 }
+        //     ]
+        // )
+
     }
 
-    private static void pedestriansAnalysis() {
+    private static void collisionSeverityAnalysis() {
+        // var totalDocument = db.collision.countDocuments()
+
+        // db.collision.aggregate(
+        //     [
+        //         { $group: { _id: "$COLLISION_SEVERITY", count: { $sum: 1 } } },  
+        //         { "$project": { 
+        //         "_id": 0, 
+        //             "Collision Severity": "$_id", 
+        //             "count": 1, 
+        //             "percentage": { 
+        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
+        //             }
+        //         },
+        // { $sort: { count: -1 } }
+        //     ]
+        // )
+
     }
 
     private static void motorcycleAnalysis() {
+        long totalMotoDocs = collisionCollection.countDocuments(eq("MOTORCYCLE_ACCIDENT", "Y"));
+
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.match(Filters.eq("MOTORCYCLE_ACCIDENT", "Y")),
+                Aggregates.group("$COLLISION_SEVERITY", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Collision Severity", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalMotoDocs
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")) 
+            )
+        );
+
+        System.out.println("1 - Fatal; 2 - Injury (Severe); 3 - Injury (Other Visible); 4 - Injury (Complaint of Pain); 0 - Property Damage Only");
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
     }
 
 
