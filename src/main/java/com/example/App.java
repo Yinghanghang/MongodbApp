@@ -115,34 +115,42 @@ public class App {
                         System.out.println();
                         weekdayAnalysis();
                         System.out.println(); 
+                        break;   
                     case 9:
                         System.out.println();
                         violationTypeAnalysis();
-                        System.out.println();       
+                        System.out.println();     
+                        break;     
                     case 10:
                         System.out.println();
                         lightingAnalysis();
                         System.out.println();      
+                        break;   
                     case 11:
                         System.out.println();
                         roadConditionAnalysis();
                         System.out.println();     
+                        break;   
                     case 12:
                         System.out.println();
                         mostCommonCollision();
                         System.out.println();  
+                        break;   
                     case 13:
                         System.out.println();
                         collisionTypeAnalysis();
                         System.out.println();    
+                        break;   
                     case 14:
                         System.out.println();
                         collisionSeverityAnalysis();
                         System.out.println();       
+                        break;   
                     case 15:
                         System.out.println();
                         motorcycleAnalysis();
                         System.out.println();   
+                        break;   
                     case 16:
                         break;
                     default:
@@ -358,9 +366,14 @@ public class App {
                         )                        
                     )
                 ),
-                Aggregates.sort(descending("count")) 
+                Aggregates.sort(descending("count")),
+                Aggregates.limit(3)
             )
         );
+
+        System.out.println(
+            "A - Clear;  B - Cloudy;  C - Raining;  D - Snowing;"
+            + "\n" + "E - Fog;  F - Other;  G - Wind;  -  - Not Stated\n");
 
         for (Document doc : output) {
             System.out.println(doc.toJson());
@@ -457,7 +470,7 @@ public class App {
             )
         );
 
-        System.out.println("1 - Monday;  2 - Tuesday; 3 - Wednesday; 4 - Thursday;  5 - Friday; 6 - Saturday; 7 - Sunday");
+        System.out.println("1 - Monday;  2 - Tuesday; 3 - Wednesday; 4 - Thursday;  5 - Friday; 6 - Saturday; 7 - Sunday\n");
         for (Document doc : output) {
             System.out.println(doc.toJson());
         }
@@ -503,7 +516,7 @@ public class App {
         + "\n" + "03 - Unsafe Speed; 04 - Following Too Closely;  05 - Wrong Side of Road; 06 - Improper Passing"
         + "\n" + "07 - Unsafe Lane Change; 08 - Improper Turning;  09 - Automobile Right of Way"
         + "\n" + "10 - Pedestrian Right of Way;  11 - Pedestrian Violation; 12 - Traffic Signals and Signs"
-        + "\n" + "13 - Hazardous Parking;  14 - Lights;  15 - Brakes ");
+        + "\n" + "13 - Hazardous Parking;  14 - Lights;  15 - Brakes\n");
         for (Document doc : output) {
             System.out.println(doc.toJson());
         }
@@ -569,24 +582,6 @@ public class App {
     }
 
     private static void lightingAnalysis() {
-        // var totalDocument = db.collision.countDocuments()
-
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$LIGHTING", count: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Lighting Type": "$_id", 
-        //             "count": 1, 
-        //             "percentage": { 
-        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
-        //             }
-        //         },
-        //     { $sort: { count: -1 } },
-        //     { $limit : 3 }
-        //     ]
-        // )
-
         long totalDocument = collisionCollection.countDocuments();
 
         AggregateIterable<Document> output = collisionCollection.aggregate(
@@ -622,9 +617,8 @@ public class App {
         );
 
         System.out.println(
-        "A - Daylight;  B - Dusk - Dawn;  C - Dark - Street Lights"
-        + "\n" + "D - Dark - No Street Lights;  E - Dark - Street Lights Not Functioning"
-        + "\n" + "-  - Not Stated");
+        "A - Daylight;  B - Dusk - Dawn;  C - Dark - Street Lights; D - Dark - No Street Lights"
+        + "\n" +   "E - Dark - Street Lights Not Functioning ; -  - Not Stated\n");
 
         for (Document doc : output) {
             System.out.println(doc.toJson());
@@ -665,7 +659,7 @@ public class App {
             )
         );
 
-        System.out.println("1 - Fatal; 2 - Injury (Severe); 3 - Injury (Other Visible); 4 - Injury (Complaint of Pain); 0 - Property Damage Only");
+        System.out.println("1 - Fatal; 2 - Injury (Severe); 3 - Injury (Other Visible); 4 - Injury (Complaint of Pain); 0 - Property Damage Only\n");
 
         for (Document doc : output) {
             System.out.println(doc.toJson());
@@ -707,7 +701,7 @@ public class App {
             )
         );
 
-        System.out.println("1 - Fatal; 2 - Injury (Severe); 3 - Injury (Other Visible); 4 - Injury (Complaint of Pain); 0 - Property Damage Only");
+        System.out.println("1 - Fatal; 2 - Injury (Severe); 3 - Injury (Other Visible); 4 - Injury (Complaint of Pain); 0 - Property Damage Only\n");
 
         for (Document doc : output) {
             System.out.println(doc.toJson());
