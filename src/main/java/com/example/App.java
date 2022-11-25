@@ -579,6 +579,46 @@ public class App {
         //     { $limit : 5 }
         //     ]
         // )
+        long totalDocument = collisionCollection.countDocuments();
+
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.group("$ROAD_SURFACE", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Road Condition", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalDocument
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")),
+                Aggregates.limit(3)
+            )
+        );
+
+        System.out.println("A - Dry;  B - Wet;  C - Snowy or Icy;  D - Slippery (Muddy, Oily, etc.;  -  - Not Stated\n");
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
+    
     }
 
     private static void lightingAnalysis() {
