@@ -544,41 +544,31 @@ public class App {
     }
 
     private static void collisionTypeAnalysis() {
-        // db.collision.aggregate(
-        //     [
-        //         { $match: { COLLISION_SEVERITY: 1 } },
-        //         { $group: { _id: "$TYPE_OF_COLLISION", Fatal_Cases: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Collision Type": "$_id", 
-        //             Fatal_Cases: 1
-        //         }
-        //         },
-        //     { $sort: {Fatal_Cases: -1 } },
-        //     { $limit : 3 }
-        //     ]
-        // )
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.match(Filters.eq("COLLISION_SEVERITY", 1)),
+                Aggregates.group("$TYPE_OF_COLLISION", Accumulators.sum("Fatal_Cases", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Collision Type", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("Fatal_Cases")                                                 
+                    )
+                ),
+                Aggregates.sort(descending("Fatal_Cases")),
+                Aggregates.limit(3) 
+            )
+        );
 
+        System.out.println("A - Head-On;  B - Sideswipe;  C - Rear End;  D - Broadside;  E - Hit Object"
+        + "\n" + "F - Overturned;  G - Vehicle/Pedestrian;  H - Other;  -  - Not Stated\n");
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
     }
 
     private static void roadConditionAnalysis() {
-        // var totalDocument = db.collision.countDocuments()
-
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$ROAD_SURFACE", count: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Road Condition": "$_id", 
-        //             "count": 1, 
-        //             "percentage": { 
-        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
-        //             }
-        //         },
-        //     { $sort: { count: -1 } },
-        //     { $limit : 5 }
-        //     ]
-        // )
         long totalDocument = collisionCollection.countDocuments();
 
         AggregateIterable<Document> output = collisionCollection.aggregate(
@@ -617,8 +607,7 @@ public class App {
 
         for (Document doc : output) {
             System.out.println(doc.toJson());
-        }
-    
+        }   
     }
 
     private static void lightingAnalysis() {
