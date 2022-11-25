@@ -19,6 +19,7 @@ import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import static com.mongodb.client.model.Sorts.descending;
 //import com.mongodb.diagnostics.logging.Logger;
@@ -381,19 +382,24 @@ public class App {
     }
 
     private static void countCollisionsAndVictims() {
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$ACCIDENT_YEAR", Number_Collisions: { $sum: 1 }, Number_Killed: { $sum: "$NUMBER_KILLED"} } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Accident Year": "$_id", 
-        //             "Number_Collisions": 1,
-        //             "Number_Killed": 1
-        //         }
-        //         },
-        //     { $sort: {"Accident Year":1 } }
-        //     ]
-        // )
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.group("$ACCIDENT_YEAR", Accumulators.sum("Number_Collisions", 1),Accumulators.sum("Number_Killed", "$NUMBER_KILLED")),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Accident Year", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("Number_Collisions"),
+                        Projections.include("Number_Killed")                                                 
+                    )
+                ),
+                Aggregates.sort(Sorts.ascending("Accident Year"))
+            )
+        );
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
     }
 
     private static void alcoholAnalysis() {
