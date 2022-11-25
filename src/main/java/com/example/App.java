@@ -169,7 +169,7 @@ public class App {
             System.out.println("operation failed");
             return;
         }     
-        System.out.println("Thank for using our service. Bye");   
+        System.out.println("Thanks for using our service. Bye.");   
     }
 
 
