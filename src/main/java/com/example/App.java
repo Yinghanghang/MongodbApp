@@ -559,7 +559,7 @@ public class App {
                     )
                 ),
                 Aggregates.sort(descending("count")),
-                Aggregates.limit(3)
+                Aggregates.limit(5)
             )
         );
 
