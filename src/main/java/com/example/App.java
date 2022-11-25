@@ -529,23 +529,46 @@ public class App {
     }
 
     private static void mostCommonCollision() {
-        // var totalDocument = db.collision.countDocuments()
+        long totalDocument = collisionCollection.countDocuments();
 
-        // db.collision.aggregate(
-        //     [
-        //         { $group: { _id: "$TYPE_OF_COLLISION", count: { $sum: 1 } } },  
-        //         { "$project": { 
-        //         "_id": 0, 
-        //             "Collision Type": "$_id", 
-        //             "count": 1, 
-        //             "percentage": { 
-        //                 "$concat": [ { "$substr": [ { "$multiply": [ { "$divide": [ "$count", {"$literal": totalDocument }] }, 100 ] }, 0,2 ] }, "", "%" ]}
-        //             }
-        //         },
-        //     { $sort: { count: -1 } },
-        //     { $limit : 3 }
-        //     ]
-        // )
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.group("$TYPE_OF_COLLISION", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Collision Type", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalDocument
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")),
+                Aggregates.limit(3)
+            )
+        );
+
+        System.out.println("A - Head-On;  B - Sideswipe;  C - Rear End;  D - Broadside;  E - Hit Object"
+        + "\n" + "F - Overturned;  G - Vehicle/Pedestrian;  H - Other;  -  - Not Stated\n");
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
 
     }
 
