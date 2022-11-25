@@ -507,7 +507,6 @@ public class App {
         for (Document doc : output) {
             System.out.println(doc.toJson());
         }
-
     }
 
     private static void mostCommonCollision() {
@@ -588,6 +587,48 @@ public class App {
         //     ]
         // )
 
+        long totalDocument = collisionCollection.countDocuments();
+
+        AggregateIterable<Document> output = collisionCollection.aggregate(
+            Arrays.asList(
+                Aggregates.group("$LIGHTING", Accumulators.sum("count", 1)),
+                Aggregates.project(
+                    Projections.fields(                       
+                        Projections.computed("Lighting Type", "$_id"),    
+                        Projections.excludeId(), 
+                        Projections.include("count"),                               
+                        Projections.computed(                                                      
+                            "percentage", 
+                            new Document("$concat", Arrays.asList(
+                                new Document("$substr", Arrays.asList(
+                                    new Document("$multiply", Arrays.asList(
+                                        new Document("$divide", Arrays.asList(
+                                            "$count", totalDocument
+                                        )),
+                                        100
+                                    )),
+                                    0,
+                                    2
+                                )),
+                                "",
+                                "%"
+                            ))
+                        )                        
+                    )
+                ),
+                Aggregates.sort(descending("count")),
+                Aggregates.limit(3)
+            )
+        );
+
+        System.out.println(
+        "A - Daylight;  B - Dusk - Dawn;  C - Dark - Street Lights"
+        + "\n" + "D - Dark - No Street Lights;  E - Dark - Street Lights Not Functioning"
+        + "\n" + "-  - Not Stated");
+
+        for (Document doc : output) {
+            System.out.println(doc.toJson());
+        }
     }
 
     private static void collisionSeverityAnalysis() {
